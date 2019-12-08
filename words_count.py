@@ -1,4 +1,5 @@
 from pyspark import SparkContext
+from pyspark.sql import SparkSession
 from pyspark.streaming import StreamingContext
 
 
@@ -26,6 +27,19 @@ def startReverseWords():
     ssc.awaitTermination()  # Wait for the computation to terminate
 
 
+def startReadLogFile():
+    sc = SparkContext("local[2]", "FileAnalyze")
+    textFile = sc.textFile("/home/madi/PycharmProjects/spark_python/data")
+    words = textFile.flatMap(lambda line: line.split(" "))
+    word_pairs = words.map(lambda word: (word, 1))
+    wordCounts = word_pairs.reduceByKey(lambda a, b: a + b)
+    lines = wordCounts.collect()
+    for line in lines:
+        print(line)
+    wordCounts.saveAsTextFile("/home/madi/PycharmProjects/spark_python/result")
+
+
 if __name__ == "__main__":
     #  startCountWords()
-    startReverseWords()
+    #  startReverseWords()
+    startReadLogFile()
